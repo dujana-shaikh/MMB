@@ -1,0 +1,6 @@
+{
+  "name": "MMB- Mumbai Mobile Bazzer",
+  "description": "MMB - Mumbai Mobile Bazzer: Premium mobile phones, accessories, and electronics store management system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
