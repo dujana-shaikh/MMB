@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI || '';
 const JWT_SECRET = process.env.JWT_SECRET || 'MMB admin panel';
@@ -183,6 +183,26 @@ function registerSse(channel: string, res: Response) {
     sseClients[channel] = sseClients[channel].filter((c) => c !== res);
   });
 }
+
+// Database connection helper (caches connection for serverless / Vercel)
+export async function connectDB() {
+  if (mongoose.connection.readyState >= 1) return;
+  if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI is not defined in environment variables!');
+    return;
+  }
+  await mongoose.connect(MONGODB_URI);
+}
+
+// Connect before handling API requests in serverless environments
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+  } catch (err: any) {
+    console.error('MongoDB connection error:', err.message);
+  }
+  next();
+});
 
 // --- HEALTH & STATUS ENDPOINT ---
 app.get('/api/health', async (req, res) => {
@@ -746,7 +766,7 @@ app.patch('/api/orders/:id/status', optionalAuth, async (req: AuthRequest, res) 
   }
 });
 
-// --- CONNECT TO MONGODB & START SERVER ---
+// --- CONNECT TO MONGODB & START SERVER (When run directly via node/tsx) ---
 async function startServer() {
   if (!MONGODB_URI) {
     console.error('❌ MONGODB_URI is not defined in .env file!');
@@ -776,4 +796,9 @@ async function startServer() {
   }
 }
 
-startServer();
+// Only start standalone server if executed directly (not in Vercel serverless)
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
+
+export default app;
