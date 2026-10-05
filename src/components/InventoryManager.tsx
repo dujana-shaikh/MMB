@@ -149,6 +149,7 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
             <option value="HEADPHONES">Headphones</option>
             <option value="CELL PHONES">Cell Phones</option>
             <option value="TABLETS">Tablets</option>
+            <option value="LAPTOPS">Laptops</option>
             <option value="VIDEO GAMES">Video Games</option>
             <option value="WEARABLE TECH">Wearable Tech</option>
             <option value="OFFICE SUPPLIES">Office Supplies</option>
@@ -187,13 +188,26 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {filteredProducts.map((product) => {
-                const isEditing = editingProductId === product.id;
-                const isLow = product.stock <= product.reorderLevel && product.stock > 0;
-                const isOut = product.stock === 0;
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-14 text-center text-slate-400">
+                    <Package className="w-9 h-9 mx-auto mb-2 text-slate-300" />
+                    <p className="font-bold text-slate-700 text-sm">No products in inventory</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {products.length === 0
+                        ? 'All demo data has been cleared. Click "Add Product" above to add new warehouse items.'
+                        : 'No products match your search or category filter.'}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => {
+                  const isEditing = editingProductId === product.id;
+                  const isLow = product.stock <= product.reorderLevel && product.stock > 0;
+                  const isOut = product.stock === 0;
 
-                return (
-                  <tr key={product.id} className="hover:bg-slate-50/80 transition-colors">
+                  return (
+                    <tr key={product.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Product Name & SKU */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -346,7 +360,7 @@ export const InventoryManager: React.FC<InventoryManagerProps> = ({
                     </td>
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

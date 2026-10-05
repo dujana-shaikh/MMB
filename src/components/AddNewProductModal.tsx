@@ -16,13 +16,13 @@ export const AddNewProductModal: React.FC<AddNewProductModalProps> = ({
   if (!isOpen) return null;
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<ElectronicCategory>('PHOTOGRAPHY');
-  const [price, setPrice] = useState('299.00');
-  const [originalPrice, setOriginalPrice] = useState('349.00');
-  const [stock, setStock] = useState('15');
-  const [reorderLevel, setReorderLevel] = useState('5');
-  const [brand, setBrand] = useState('Ontas');
-  const [sku, setSku] = useState(`ONT-${Math.random().toString(36).substring(2, 6).toUpperCase()}`);
+  const [category, setCategory] = useState<ElectronicCategory>('CELL PHONES');
+  const [price, setPrice] = useState('');
+  const [originalPrice, setOriginalPrice] = useState('');
+  const [stock, setStock] = useState('10');
+  const [reorderLevel, setReorderLevel] = useState('2');
+  const [brand, setBrand] = useState('');
+  const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,12 +35,12 @@ export const AddNewProductModal: React.FC<AddNewProductModalProps> = ({
       price: parseFloat(price) || 0,
       originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
       stock: parseInt(stock, 10) || 0,
-      reorderLevel: parseInt(reorderLevel, 10) || 5,
-      sku: sku.trim() || `ONT-${Date.now().toString().slice(-4)}`,
-      rating: 4.8,
-      reviewsCount: 1,
-      description: description.trim() || `${name} electronic item in stock.`,
-      brand: brand.trim() || 'Ontas'
+      reorderLevel: parseInt(reorderLevel, 10) || 2,
+      sku: sku.trim() || `MMB-${Date.now().toString().slice(-6).toUpperCase()}`,
+      rating: 5.0,
+      reviewsCount: 0,
+      description: description.trim() || `${name.trim()} in stock at Mumbai Mobile Bazaar.`,
+      brand: brand.trim() || 'General'
     });
 
     onClose();
@@ -102,6 +102,7 @@ export const AddNewProductModal: React.FC<AddNewProductModalProps> = ({
                 <option value="HEADPHONES">HEADPHONES</option>
                 <option value="CELL PHONES">CELL PHONES</option>
                 <option value="TABLETS">TABLETS</option>
+                <option value="LAPTOPS">LAPTOPS</option>
                 <option value="VIDEO GAMES">VIDEO GAMES</option>
                 <option value="WEARABLE TECH">WEARABLE TECH</option>
                 <option value="OFFICE SUPPLIES">OFFICE SUPPLIES</option>

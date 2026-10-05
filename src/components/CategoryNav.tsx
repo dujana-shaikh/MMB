@@ -14,6 +14,7 @@ const CATEGORIES: { id: ElectronicCategory; label: string }[] = [
   { id: 'HEADPHONES', label: 'HEADPHONES' },
   { id: 'CELL PHONES', label: 'CELL PHONES' },
   { id: 'TABLETS', label: 'TABLETS' },
+  { id: 'LAPTOPS', label: 'LAPTOPS' },
   { id: 'PHOTOGRAPHY', label: 'PHOTOGRAPHY' }
 ];
 

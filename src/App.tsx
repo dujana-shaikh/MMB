@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS } from './data/initialData';
 import {
   Product,
   CustomerOrder,
@@ -29,10 +28,42 @@ import { CounterOfferModal } from './components/CounterOfferModal';
 import { LayoutDashboard, Package, ShoppingCart, BarChart3, Store } from 'lucide-react';
 
 export default function App() {
-  // 1. Data States (starts empty and syncs with MongoDB Atlas)
-  const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<CustomerOrder[]>([]);
-  const [cartItems, setCartItems] = useState<OrderItem[]>([]);
+  // 1. Data States (starts empty - no demo data)
+  const [products, setProducts] = useState<Product[]>(() => {
+    try {
+      // Clear legacy demo data storage
+      localStorage.removeItem('mmb_products_catalog_v6');
+      localStorage.removeItem('mmb_customer_orders_inr');
+      localStorage.removeItem('mmb_cart_items_inr');
+
+      const saved = localStorage.getItem('mmb_live_products_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [orders, setOrders] = useState<CustomerOrder[]>(() => {
+    try {
+      const saved = localStorage.getItem('mmb_live_orders_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [cartItems, setCartItems] = useState<OrderItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('mmb_live_cart_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
 
   // 2. Navigation & View States
   const [activeView, setActiveView] = useState<
@@ -71,10 +102,10 @@ export default function App() {
             api.getProducts(),
             api.getOrders()
           ]);
-          if (isMounted && remoteProducts.length > 0) {
+          if (isMounted && Array.isArray(remoteProducts)) {
             setProducts(remoteProducts);
           }
-          if (isMounted && remoteOrders.length > 0) {
+          if (isMounted && Array.isArray(remoteOrders)) {
             setOrders(remoteOrders);
           }
         }
@@ -97,10 +128,10 @@ export default function App() {
     };
   }, []);
 
-  // Save to localStorage
+  // Save live store data to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('mmb_products_catalog_v6', JSON.stringify(products));
+      localStorage.setItem('mmb_live_products_v1', JSON.stringify(products));
     } catch {
       // ignore
     }
@@ -108,7 +139,7 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('mmb_customer_orders_inr', JSON.stringify(orders));
+      localStorage.setItem('mmb_live_orders_v1', JSON.stringify(orders));
     } catch {
       // ignore
     }
@@ -116,13 +147,13 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('mmb_cart_items_inr', JSON.stringify(cartItems));
+      localStorage.setItem('mmb_live_cart_v1', JSON.stringify(cartItems));
     } catch {
       // ignore
     }
   }, [cartItems]);
 
-  // Compute Store Metrics in real time
+  // Compute Store Metrics in real time based strictly on real transactions
   const metrics: StoreMetrics = useMemo(() => {
     const totalRev = orders.reduce((acc, ord) => acc + ord.totalAmount, 0);
     const today = new Date().toISOString().slice(0, 10);
@@ -133,13 +164,13 @@ export default function App() {
 
     return {
       totalRevenue: totalRev,
-      todayRevenue: todayRev > 0 ? todayRev : 4680.5,
+      todayRevenue: todayRev,
       totalOrders: orders.length,
-      todayOrders: todayOrdersList.length > 0 ? todayOrdersList.length : 19,
+      todayOrders: todayOrdersList.length,
       averageOrderValue: avgOrderVal,
       lowStockItemsCount: lowStock,
-      activeVisitors: 34,
-      conversionRate: 3.4
+      activeVisitors: 0,
+      conversionRate: 0
     };
   }, [orders, products]);
 

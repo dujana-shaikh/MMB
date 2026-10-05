@@ -6,6 +6,7 @@
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev:all": "concurrently \"tsx server.ts\" \"vite --port=3000 --host=0.0.0.0\"",
     "server": "tsx server.ts",
     "start": "tsx server.ts",
     "build": "vite build",

@@ -9,7 +9,8 @@ export type ElectronicCategory =
   | 'WEARABLE TECH'
   | 'OFFICE SUPPLIES'
   | 'SECURITY'
-  | 'TABLETS';
+  | 'TABLETS'
+  | 'LAPTOPS';
 
 export interface ProductVariantItem {
   id: string;

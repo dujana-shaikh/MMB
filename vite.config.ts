@@ -18,6 +18,14 @@ export default defineConfig(() => {
           target: 'http://127.0.0.1:5000',
           changeOrigin: true,
           secure: false,
+          configure: (proxy) => {
+            proxy.on('error', (err, _req, res) => {
+              if (res && 'writeHead' in res && !res.headersSent) {
+                res.writeHead(503, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ database: 'disconnected', error: (err as any)?.message || 'Server offline' }));
+              }
+            });
+          },
         },
       },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

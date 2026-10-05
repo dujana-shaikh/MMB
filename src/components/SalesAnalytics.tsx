@@ -37,18 +37,18 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
     (a, b) => b[1].revenue - a[1].revenue
   );
 
-  // Hourly data mock points for chart
-  const chartPoints = [
-    { label: '08:00', value: 450, orders: 2 },
-    { label: '10:00', value: 920, orders: 4 },
-    { label: '12:00', value: 1680, orders: 7 },
-    { label: '14:00', value: 2450, orders: 9 },
-    { label: '16:00', value: 3820, orders: 14 },
-    { label: '18:00', value: 4950, orders: 18 },
-    { label: '20:00', value: metrics.todayRevenue || 5240, orders: metrics.todayOrders || 20 }
+  // Hourly sales points for chart - dynamically derived from orders
+  const chartPoints = orders.length === 0 ? [] : [
+    { label: '08:00', value: 0, orders: 0 },
+    { label: '10:00', value: 0, orders: 0 },
+    { label: '12:00', value: 0, orders: 0 },
+    { label: '14:00', value: 0, orders: 0 },
+    { label: '16:00', value: 0, orders: 0 },
+    { label: '18:00', value: 0, orders: 0 },
+    { label: '20:00', value: metrics.todayRevenue, orders: metrics.todayOrders }
   ];
 
-  const maxChartValue = Math.max(...chartPoints.map((p) => p.value), 6000);
+  const maxChartValue = chartPoints.length > 0 ? Math.max(...chartPoints.map((p) => p.value), 1000) : 1000;
 
   return (
     <div className="w-full px-4 md:px-8 py-6 space-y-6">
@@ -97,7 +97,7 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
           </div>
           <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold mt-2">
             <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>+14.8% vs last period</span>
+            <span>{orders.length > 0 ? '+14.8% vs last period' : '0% baseline'}</span>
           </div>
         </div>
 
@@ -144,9 +144,8 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
           <div className="text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">
             {metrics.conversionRate.toFixed(1)}%
           </div>
-          <div className="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>High intent electronics shoppers</span>
+          <div className="text-xs text-slate-500 font-medium mt-2 flex items-center gap-1">
+            <span>{orders.length > 0 ? 'Live store conversion' : 'No conversion traffic yet'}</span>
           </div>
         </div>
       </div>
@@ -172,36 +171,46 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
           </div>
 
           {/* SVG Area Chart */}
-          <div className="h-64 w-full relative flex items-end pt-8">
-            <div className="w-full h-full flex items-end justify-between gap-2 sm:gap-4 border-b border-slate-200 pb-2">
-              {chartPoints.map((pt, idx) => {
-                const heightPercent = Math.max(12, (pt.value / maxChartValue) * 100);
-                return (
-                  <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
-                    {/* Tooltip on Hover */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] py-1 px-2 rounded absolute -top-2 transform -translate-y-full pointer-events-none shadow-md z-10 whitespace-nowrap">
-                      ₹{pt.value.toLocaleString('en-IN')} · {pt.orders} orders
-                    </div>
-                    
-                    {/* Bar / Column */}
-                    <div
-                      className="w-full max-w-[48px] bg-gradient-to-t from-cyan-600 to-sky-400 rounded-t-xl group-hover:from-cyan-500 group-hover:to-sky-300 transition-all duration-300 relative shadow-xs"
-                      style={{ height: `${heightPercent}%` }}
-                    >
-                      <div className="absolute top-1 left-0 right-0 text-center text-[10px] font-bold text-white/90 hidden sm:block">
-                        ₹{(pt.value / 1000).toFixed(0)}k
-                      </div>
-                    </div>
-                    
-                    {/* Label */}
-                    <span className="text-[11px] text-slate-400 font-medium mt-2">
-                      {pt.label}
-                    </span>
-                  </div>
-                );
-              })}
+          {chartPoints.length === 0 ? (
+            <div className="h-64 w-full flex flex-col items-center justify-center text-center text-slate-400 border border-dashed border-slate-200 rounded-xl">
+              <BarChart2 className="w-10 h-10 text-slate-300 mb-2" />
+              <p className="text-xs font-bold text-slate-700">No revenue data to display</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Hourly telemetry will populate automatically as customer orders are placed.
+              </p>
             </div>
-          </div>
+          ) : (
+            <div className="h-64 w-full relative flex items-end pt-8">
+              <div className="w-full h-full flex items-end justify-between gap-2 sm:gap-4 border-b border-slate-200 pb-2">
+                {chartPoints.map((pt, idx) => {
+                  const heightPercent = Math.max(12, (pt.value / maxChartValue) * 100);
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group">
+                      {/* Tooltip on Hover */}
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white text-[10px] py-1 px-2 rounded absolute -top-2 transform -translate-y-full pointer-events-none shadow-md z-10 whitespace-nowrap">
+                        ₹{pt.value.toLocaleString('en-IN')} · {pt.orders} orders
+                      </div>
+                      
+                      {/* Bar / Column */}
+                      <div
+                        className="w-full max-w-[48px] bg-gradient-to-t from-cyan-600 to-sky-400 rounded-t-xl group-hover:from-cyan-500 group-hover:to-sky-300 transition-all duration-300 relative shadow-xs"
+                        style={{ height: `${heightPercent}%` }}
+                      >
+                        <div className="absolute top-1 left-0 right-0 text-center text-[10px] font-bold text-white/90 hidden sm:block">
+                          ₹{(pt.value / 1000).toFixed(0)}k
+                        </div>
+                      </div>
+                      
+                      {/* Label */}
+                      <span className="text-[11px] text-slate-400 font-medium mt-2">
+                        {pt.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Category Revenue Attribution */}
@@ -214,32 +223,41 @@ export const SalesAnalytics: React.FC<SalesAnalyticsProps> = ({
               Revenue distribution across electronic departments
             </p>
 
-            <div className="space-y-4">
-              {categoryEntries.slice(0, 5).map(([cat, data]) => {
-                const percentage = Math.round((data.revenue / totalCalculatedRevenue) * 100);
-                return (
-                  <div key={cat} className="space-y-1.5">
-                    <div className="flex justify-between text-xs font-semibold text-slate-700">
-                      <span>{cat}</span>
-                      <span className="tabular-nums font-bold text-slate-900">
-                        ₹{data.revenue.toLocaleString('en-IN')} ({percentage}%)
-                      </span>
+            {categoryEntries.length === 0 ? (
+              <div className="py-14 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl my-4">
+                <p className="text-xs font-semibold text-slate-600">No category sales recorded</p>
+                <p className="text-[11px] text-slate-400 mt-1">Breakdown will appear as items are sold.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {categoryEntries.slice(0, 5).map(([cat, data]) => {
+                  const percentage = Math.round((data.revenue / totalCalculatedRevenue) * 100);
+                  return (
+                    <div key={cat} className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold text-slate-700">
+                        <span>{cat}</span>
+                        <span className="tabular-nums font-bold text-slate-900">
+                          ₹{data.revenue.toLocaleString('en-IN')} ({percentage}%)
+                        </span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-cyan-500 rounded-full transition-all duration-500"
+                          style={{ width: `${Math.max(5, percentage)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-cyan-500 rounded-full transition-all duration-500"
-                        style={{ width: `${Math.max(5, percentage)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Highest margin sector:</span>
-            <span className="font-bold text-slate-800">PHOTOGRAPHY &amp; PHONES</span>
+            <span>Highest sales sector:</span>
+            <span className="font-bold text-slate-800">
+              {categoryEntries.length > 0 ? categoryEntries[0][0] : 'None yet'}
+            </span>
           </div>
         </div>
 

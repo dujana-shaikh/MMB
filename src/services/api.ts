@@ -1,5 +1,4 @@
 import { Product, CustomerOrder, OrderStatus, PaymentStatus } from '../types';
-import { INITIAL_PRODUCTS, INITIAL_ORDERS } from '../data/initialData';
 
 const BASE_URL = '/api';
 
@@ -15,17 +14,18 @@ export const api = {
   async checkHealth(): Promise<DbStatus> {
     try {
       const res = await fetch(`${BASE_URL}/health`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        return { connected: false };
+      }
       const data = await res.json();
       return {
         connected: data.database === 'connected',
         dbName: data.dbName,
         host: data.host,
       };
-    } catch (err: any) {
+    } catch {
       return {
-        connected: false,
-        error: err.message,
+        connected: false
       };
     }
   },

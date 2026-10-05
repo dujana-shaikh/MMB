@@ -4,6 +4,7 @@ import {
   Headphones,
   Smartphone,
   Tablet,
+  Laptop,
   ChevronRight,
   Layers,
   X
@@ -51,6 +52,12 @@ export const CATEGORY_ENTRIES: CategoryNavEntry[] = [
     label: 'Tablet',
     icon: <Tablet className="w-4 h-4" />,
     description: 'iPads, Android & 2K tablets'
+  },
+  {
+    id: 'LAPTOPS',
+    label: 'Laptop',
+    icon: <Laptop className="w-4 h-4" />,
+    description: 'MacBooks, Gaming & Ultrabooks'
   }
 ];
 
